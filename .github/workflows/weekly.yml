@@ -36,7 +36,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/seen_ids.json papers/
+          git add data/seen_ids.json
+          git add papers/ 2>/dev/null || true
           # 只在文件有变化时提交
           git diff --staged --quiet || git commit -m "papers: weekly digest [$(date +'%Y-%m-%d')]"
           git push
