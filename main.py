@@ -11,6 +11,7 @@ from arxiv_fetcher import fetch_papers
 from semantic_fetcher import enrich_citations
 from translator import translate_papers
 from email_sender import send_email
+from paper_saver import save_papers
 
 SEEN_IDS_FILE = Path("data/seen_ids.json")
 MAX_PAPERS = 10  # 每次最多推送篇数
@@ -96,7 +97,10 @@ def main():
     # 6. 推送微信（Server酱）
     send_email(selected)
 
-    # 7. 更新已见记录（保存所有候选，不只是精选，避免下次重复抓取低分论文）
+    # 7. 保存为 Markdown 存档到 papers/
+    save_papers(selected)
+
+    # 8. 更新已见记录（保存所有候选，不只是精选，避免下次重复抓取低分论文）
     new_ids = {p["id"] for p in candidate_papers}
     seen_ids.update(new_ids)
     save_seen_ids(seen_ids)

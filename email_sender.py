@@ -14,8 +14,8 @@ def _popularity_label(paper: Dict) -> str:
     citations = paper.get("citations", 0)
     influential = paper.get("influential_citations", 0)
     if citations == 0:
-        return "新论文·暂无引用"
-    label = f"被引 {citations} 次"
+        return "🆕 新论文"
+    label = f"📊 被引 {citations} 次"
     if influential:
         label += f"（高影响 {influential} 次）"
     return label
@@ -31,9 +31,9 @@ def _paper_block(index: int, paper: Dict) -> str:
     return (
         f"### {index}. [{title_zh}]({paper['url']})\n\n"
         f"*{paper['title']}*\n\n"
-        f"> {paper['topic']} · {paper['published']} · {popularity}\n\n"
+        f"`{paper['topic']}` `{paper['published']}` {popularity}\n\n"
         f"{abstract_zh}\n\n"
-        f"作者：{authors}\n\n"
+        f"✍️ {authors}\n\n"
         "---\n\n"
     )
 
