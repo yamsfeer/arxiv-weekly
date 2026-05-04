@@ -7,7 +7,7 @@ from typing import List, Dict
 from openai import OpenAI
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-MODEL = "deepseek-chat"
+MODEL = "deepseek-v4-flash"
 BATCH_SIZE = 5  # 每批翻译的论文数
 
 
