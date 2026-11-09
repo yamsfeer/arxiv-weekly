@@ -1,70 +1,71 @@
-"""
-将每周精选论文保存为 Markdown 文件到 papers/ 目录
-"""
-from datetime import datetime
+"""把每周精选论文写成 Markdown 归档，并维护索引与"最新一期"快捷文件。"""
+from __future__ import annotations
+
+import re
 from pathlib import Path
 from typing import List, Dict
 
-PAPERS_DIR = Path("papers")
+from config import PAPERS_DIR
+from digest import archive_markdown, format_date
+
+LATEST_FILE = "latest.md"
+INDEX_FILE = "README.md"
+_HEADING = re.compile(r"^## ", re.MULTILINE)
+_DATE_FILE = re.compile(r"^(\d{4}-\d{2}-\d{2})\.md$")
 
 
-def _citation_tag(paper: Dict) -> str:
-    citations = paper.get("citations", 0)
-    influential = paper.get("influential_citations", 0)
-    if citations == 0:
-        return "🆕 新论文·暂无引用数据"
-    tag = f"📊 被引 **{citations}** 次"
-    if influential:
-        tag += f"，高影响引用 **{influential}** 次"
-    return tag
+def save_papers(papers: List[Dict], date_str: str) -> Path:
+    """保存到 papers/YYYY-MM-DD.md，同时刷新 latest.md 与索引。"""
+    PAPERS_DIR.mkdir(parents=True, exist_ok=True)
+    filepath = PAPERS_DIR / f"{date_str}.md"
+    filepath.write_text(archive_markdown(papers, date_str), encoding="utf-8")
+    print(f"[saver] 已保存到 {filepath}")
+
+    latest = PAPERS_DIR / LATEST_FILE
+    latest.write_text(archive_markdown(papers, date_str), encoding="utf-8")
+
+    write_index()
+    return filepath
 
 
-def build_markdown(papers: List[Dict], date_str: str) -> str:
+def _digest_files() -> List[Path]:
+    return sorted(
+        (p for p in PAPERS_DIR.glob("*.md") if _DATE_FILE.match(p.name)),
+        reverse=True,
+    )
+
+
+def write_index(path: Path | None = None) -> Path:
+    """重建归档索引，按时间倒序列出每周的篇数与链接。"""
+    path = path or PAPERS_DIR / INDEX_FILE
+    files = _digest_files()
     lines = [
-        f"# 📚 每周论文推荐 · {date_str}",
+        "# 论文周报归档",
         "",
-        f"> 共 {len(papers)} 篇 · 由 GitHub Actions + DeepSeek 自动生成",
+        "每周一 09:00（北京时间）自动更新。打开最新一期：[latest.md](latest.md)",
         "",
     ]
-
-    for i, p in enumerate(papers, 1):
-        title_zh = p.get("title_zh", p["title"])
-        abstract_zh = p.get("abstract_zh", p["abstract"])
-        authors = "、".join(p.get("authors", []))
-        citation_tag = _citation_tag(p)
-
+    if files:
+        latest_date = files[0].stem
+        try:
+            content = files[0].read_text(encoding="utf-8")
+        except OSError:
+            content = ""
+        count = len(_HEADING.findall(content))
         lines += [
-            f"## {i}. {title_zh}",
+            f"最新一期：**[{format_date(latest_date)}]({files[0].name})** · {count} 篇",
             "",
-            f"**原标题：** {p['title']}",
-            "",
-            f"| 字段 | 内容 |",
-            f"|------|------|",
-            f"| 话题 | {p['topic']} |",
-            f"| 发布时间 | {p['published']} |",
-            f"| 流行度 | {citation_tag} |",
-            f"| 作者 | {authors} |",
-            f"| 链接 | [{p['id']}]({p['url']}) |",
-            "",
-            "**摘要：**",
-            "",
-            abstract_zh,
-            "",
-            "---",
-            "",
+            "| 日期 | 篇数 | 链接 |",
+            "|------|------|------|",
         ]
+        for file in files:
+            try:
+                count = len(_HEADING.findall(file.read_text(encoding="utf-8")))
+            except OSError:
+                count = 0
+            lines.append(f"| {file.stem} | {count} | [{file.stem}]({file.name}) |")
+    else:
+        lines.append("_还没有任何一期，等待下一次定时任务。_")
 
-    return "\n".join(lines)
-
-
-def save_papers(papers: List[Dict]) -> Path:
-    """保存论文到 papers/YYYY-MM-DD.md，返回文件路径"""
-    PAPERS_DIR.mkdir(exist_ok=True)
-    date_str = datetime.now().strftime("%Y年%m月%d日")
-    filename = datetime.now().strftime("%Y-%m-%d") + ".md"
-    filepath = PAPERS_DIR / filename
-
-    content = build_markdown(papers, date_str)
-    filepath.write_text(content, encoding="utf-8")
-    print(f"[saver] 已保存到 {filepath}")
-    return filepath
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return path
