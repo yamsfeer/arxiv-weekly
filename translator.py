@@ -1,14 +1,25 @@
-"""
-使用 DeepSeek API 将论文标题和摘要翻译成中文
-"""
-import os
+"""使用 DeepSeek API 把论文标题和摘要翻译成中文。"""
+from __future__ import annotations
+
 import json
-from typing import List, Dict
+import os
+from typing import Dict, List, Optional
+
 from openai import OpenAI
 
-DEEPSEEK_BASE_URL = "https://api.deepseek.com"
-MODEL = "deepseek-v4-flash"
+from ids import normalize_id
+from config import DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
+
 BATCH_SIZE = 5  # 每批翻译的论文数
+RETRIES = 2
+
+PROMPT_TEMPLATE = (
+    "请将以下学术论文的标题（title）和摘要（abstract）翻译成中文，"
+    "保持学术准确性，中文摘要控制在 150 字以内，简洁清晰。\n\n"
+    "返回 JSON 格式，结构为：\n"
+    '{{"papers": [{{"id": "...", "title_zh": "...", "abstract_zh": "..."}}]}}\n\n'
+    "论文列表：\n{payload}"
+)
 
 
 def get_client() -> OpenAI:
@@ -19,44 +30,45 @@ def get_client() -> OpenAI:
 
 
 def translate_batch(client: OpenAI, papers: List[Dict]) -> List[Dict]:
-    """翻译一批论文，返回带 id/title_zh/abstract_zh 的列表"""
+    """翻译一批论文，返回带 id/title_zh/abstract_zh 的列表。"""
     payload = json.dumps(
         [{"id": p["id"], "title": p["title"], "abstract": p["abstract"]} for p in papers],
         ensure_ascii=False,
     )
-    prompt = (
-        "请将以下学术论文的标题（title）和摘要（abstract）翻译成中文，"
-        "保持学术准确性，中文摘要控制在 150 字以内，简洁清晰。\n\n"
-        "返回 JSON 格式，结构为：\n"
-        '{"papers": [{"id": "...", "title_zh": "...", "abstract_zh": "..."}]}\n\n'
-        f"论文列表：\n{payload}"
-    )
-
     response = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": prompt}],
+        model=DEEPSEEK_MODEL,
+        messages=[{"role": "user", "content": PROMPT_TEMPLATE.format(payload=payload)}],
         response_format={"type": "json_object"},
         temperature=0.3,
+        timeout=120,
     )
 
-    content = response.choices[0].message.content
-    result = json.loads(content)
+    result = json.loads(response.choices[0].message.content)
 
     # 兼容不同的返回结构
     if isinstance(result, list):
         return result
     if "papers" in result:
         return result["papers"]
-    # fallback：取第一个列表值
-    for v in result.values():
-        if isinstance(v, list):
-            return v
+    for value in result.values():
+        if isinstance(value, list):
+            return value
     return []
 
 
-def translate_papers(papers: List[Dict]) -> List[Dict]:
-    """翻译所有论文，失败时保留英文原文"""
-    client = get_client()
+def translate_papers(
+    papers: List[Dict],
+    client: Optional[OpenAI] = None,
+    skip: bool = False,
+) -> List[Dict]:
+    """翻译所有论文，失败时保留英文原文。"""
+    for paper in papers:
+        paper["title_zh"] = paper["title"]
+        paper["abstract_zh"] = paper["abstract"]
+    if not papers or skip:
+        return papers
+
+    client = client or get_client()
     translated: Dict[str, Dict] = {}
 
     for i in range(0, len(papers), BATCH_SIZE):
@@ -65,18 +77,20 @@ def translate_papers(papers: List[Dict]) -> List[Dict]:
         total_batches = (len(papers) + BATCH_SIZE - 1) // BATCH_SIZE
         print(f"[translate] 翻译批次 {batch_num}/{total_batches}...")
 
-        try:
-            results = translate_batch(client, batch)
-            for item in results:
-                if "id" in item:
-                    translated[item["id"]] = item
-        except Exception as e:
-            print(f"  批次 {batch_num} 翻译失败：{e}，保留英文原文")
+        for attempt in range(1, RETRIES + 1):
+            try:
+                for item in translate_batch(client, batch):
+                    paper_id = normalize_id(str(item.get("id", "")))
+                    if paper_id:
+                        translated[paper_id] = item
+                break
+            except Exception as exc:  # 翻译失败不是致命问题，保留英文即可
+                print(f"  批次 {batch_num} 第 {attempt} 次翻译失败：{exc}")
 
     for paper in papers:
-        t = translated.get(paper["id"], {})
-        paper["title_zh"] = t.get("title_zh") or paper["title"]
-        paper["abstract_zh"] = t.get("abstract_zh") or paper["abstract"]
+        item = translated.get(paper["id"], {})
+        paper["title_zh"] = (item.get("title_zh") or "").strip() or paper["title"]
+        paper["abstract_zh"] = (item.get("abstract_zh") or "").strip() or paper["abstract"]
 
     print(f"[translate] 翻译完成，成功 {len(translated)}/{len(papers)} 篇")
     return papers

@@ -1,116 +1,102 @@
-"""
-主入口：每周执行一次，抓取 → 去重 → 补充引用 → 翻译 → 发邮件 → 保存记录
-"""
-import json
-import sys
-from datetime import datetime
-from pathlib import Path
-from typing import List, Dict
+"""主入口：抓取 → 去重 → 补引用 → 精选 → 翻译 → 归档 → 推送飞书 → 记录。
 
+用法：
+    python main.py                  # 正式跑一次
+    python main.py --dry-run        # 只抓取/精选/翻译，打印卡片不发送、不写文件
+    python main.py --test-push      # 只发一张测试卡片，验证飞书配置
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+
+import feishu
+import store
 from arxiv_fetcher import fetch_papers
+from config import MAX_PAPERS, today_str
+from digest import plain_text
+from paper_saver import save_papers
+from selector import select_papers
 from semantic_fetcher import enrich_citations
 from translator import translate_papers
-from email_sender import send_email
-from paper_saver import save_papers
-
-SEEN_IDS_FILE = Path("data/seen_ids.json")
-MAX_PAPERS = 10  # 每次最多推送篇数
 
 
-def load_seen_ids() -> set:
-    if SEEN_IDS_FILE.exists():
-        return set(json.loads(SEEN_IDS_FILE.read_text(encoding="utf-8")))
-    return set()
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description="arXiv 每周论文精选 → 飞书")
+    parser.add_argument("--dry-run", action="store_true", help="不推送、不写文件，只打印结果与卡片 JSON")
+    parser.add_argument("--test-push", action="store_true", help="发一张测试卡片，验证飞书配置")
+    parser.add_argument("--max-papers", type=int, default=None, help=f"本次推送篇数（默认 {MAX_PAPERS}）")
+    parser.add_argument("--no-translate", action="store_true", help="跳过翻译，直接用英文原文")
+    return parser.parse_args(argv)
 
 
-def save_seen_ids(seen_ids: set):
-    SEEN_IDS_FILE.parent.mkdir(exist_ok=True)
-    SEEN_IDS_FILE.write_text(
-        json.dumps(sorted(seen_ids), indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+def run(args) -> int:
+    date_str = today_str()
+    archive_url = feishu.github_archive_url(date_str)
 
+    if args.test_push:
+        feishu.send_test(dry_run=args.dry_run)
+        return 0
 
-def score_paper(paper: Dict) -> float:
-    """综合评分：引用数 + 高影响引用，用于排序"""
-    return paper.get("citations", 0) * 1.0 + paper.get("influential_citations", 0) * 5.0
+    max_papers = args.max_papers or MAX_PAPERS
+    seen = store.load()
+    print(f"已记录论文数：{len(seen)}")
 
+    papers = fetch_papers()
+    candidates = [p for p in papers if p["id"] not in seen]
+    print(f"\n未见过的论文：{len(candidates)} 篇\n")
 
-def select_new_papers(all_papers: List[Dict], seen_ids: set) -> List[Dict]:
-    """过滤已见过的，按评分降序，取前 MAX_PAPERS 篇"""
-    new_papers = [p for p in all_papers if p["id"] not in seen_ids]
+    if not candidates:
+        print("本周没有新论文。")
+        if not args.dry_run:
+            feishu.send_empty_notice(date_str, archive_url)
+        return 0
 
-    # 优先取有引用数据的，其次按提交时间倒序
-    new_papers.sort(key=lambda p: (score_paper(p), p["published"]), reverse=True)
+    enrich_citations(candidates)
+    selected = select_papers(candidates, max_papers=max_papers)
+    print(f"\n精选 {len(selected)} 篇：{plain_text(selected, date_str)}")
 
-    # 尽量保证各话题都有覆盖（每个话题至少 1 篇）
-    topic_buckets: Dict[str, List[Dict]] = {}
-    for p in new_papers:
-        topic_buckets.setdefault(p["topic"], []).append(p)
+    has_key = bool(os.environ.get("DEEPSEEK_API_KEY"))
+    skip_translate = args.no_translate or not has_key
+    if not has_key and not args.no_translate:
+        print("[translate] 没有 DEEPSEEK_API_KEY，跳过翻译，保留英文原文")
+    selected = translate_papers(selected, skip=skip_translate)
 
-    selected: List[Dict] = []
-    # 先每个话题取 1 篇
-    for papers_in_topic in topic_buckets.values():
-        if papers_in_topic:
-            selected.append(papers_in_topic.pop(0))
-        if len(selected) >= MAX_PAPERS:
-            break
+    if args.dry_run:
+        print("\n[dry-run] 归档内容如下：\n")
+        from digest import archive_markdown
 
-    # 补足到 MAX_PAPERS
-    if len(selected) < MAX_PAPERS:
-        remaining = [p for bucket in topic_buckets.values() for p in bucket]
-        remaining.sort(key=score_paper, reverse=True)
-        selected += remaining[: MAX_PAPERS - len(selected)]
+        print(archive_markdown(selected, date_str, archive_url))
+        feishu.send_digest(selected, date_str, archive_url, dry_run=True)
+        return 0
 
-    return selected[:MAX_PAPERS]
+    # 先落盘归档，这样卡片里的归档链接点开就是本期内容
+    save_papers(selected, date_str)
+    feishu.send_digest(selected, date_str, archive_url)
 
-
-def main():
-    print(f"\n{'=' * 50}")
-    print(f"arxiv-weekly 开始运行：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"{'=' * 50}\n")
-
-    seen_ids = load_seen_ids()
-    print(f"已记录论文数：{len(seen_ids)}\n")
-
-    # 1. 抓取 arxiv 论文
-    all_papers = fetch_papers()
-
-    # 2. 在补充引用前先做粗筛（节省 API 请求）
-    candidate_papers = [p for p in all_papers if p["id"] not in seen_ids]
-    print(f"\n未见过的论文：{len(candidate_papers)} 篇\n")
-
-    if not candidate_papers:
-        print("本周没有新论文，跳过邮件发送。")
-        return
-
-    # 3. 补充引用数（只查候选论文）
-    candidate_papers = enrich_citations(candidate_papers)
-
-    # 4. 精选 MAX_PAPERS 篇
-    selected = select_new_papers(candidate_papers, seen_ids)
-    print(f"\n精选 {len(selected)} 篇论文\n")
-
-    # 5. 翻译标题和摘要
-    selected = translate_papers(selected)
-
-    # 6. 推送微信（Server酱）
-    send_email(selected)
-
-    # 7. 保存为 Markdown 存档到 papers/
-    save_papers(selected)
-
-    # 8. 更新已见记录（保存所有候选，不只是精选，避免下次重复抓取低分论文）
-    new_ids = {p["id"] for p in candidate_papers}
-    seen_ids.update(new_ids)
-    save_seen_ids(seen_ids)
-    print(f"\n已更新 seen_ids，共记录 {len(seen_ids)} 篇")
+    # 推送成功后再记 seen，避免推送失败却把论文标成"已读"
+    seen = store.save(store.mark(seen, [p["id"] for p in candidates]))
+    print(f"\n已更新 seen_ids，共记录 {len(seen)} 篇")
     print("\n✅ 完成\n")
+    return 0
+
+
+def main(argv=None) -> int:
+    args = parse_args(argv)
+    print(f"\n{'=' * 50}")
+    print(f"arxiv-weekly 开始运行：{today_str()}")
+    print(f"{'=' * 50}\n")
+    try:
+        return run(args)
+    except Exception as exc:
+        print(f"\n❌ 运行出错：{exc}", file=sys.stderr)
+        if os.environ.get("DEBUG"):
+            import traceback
+
+            traceback.print_exc()
+        return 1
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"\n❌ 运行出错：{e}", file=sys.stderr)
-        sys.exit(1)
+    sys.exit(main())

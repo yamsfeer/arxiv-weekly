@@ -6,12 +6,27 @@ on:
     - cron: '0 1 * * 1'
   # 允许手动在 GitHub Actions 界面触发，方便测试
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '只抓取和生成卡片，不推送、不提交（测试用）'
+        type: boolean
+        default: false
+      max_papers:
+        description: '本次推送篇数，留空用默认 10'
+        required: false
+        default: ''
+
+# 同一时间只跑一个实例，避免两次运行抢着提交 seen_ids.json
+concurrency:
+  group: weekly-digest
+  cancel-in-progress: false
 
 jobs:
-  fetch-papers:
+  digest:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
-      contents: write  # 允许提交 seen_ids.json
+      contents: write  # 允许提交 papers/ 与 data/seen_ids.json
 
     steps:
       - name: Checkout 仓库
@@ -24,20 +39,53 @@ jobs:
           cache: 'pip'
 
       - name: 安装依赖
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt -r requirements-dev.txt
 
-      - name: 运行论文抓取脚本
+      - name: 跑单元测试
+        run: python -m pytest -q
+
+      - name: 抓取论文并推送飞书
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
-        run: python main.py
+          # 通道 A：群自定义机器人
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+          FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
+          # 通道 B：自建应用私聊
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          FEISHU_RECEIVE_ID: ${{ secrets.FEISHU_RECEIVE_ID }}
+          # 非敏感开关放仓库 Variables（Settings → Secrets and variables → Actions → Variables）
+          FEISHU_CHANNEL: ${{ vars.FEISHU_CHANNEL }}
+          FEISHU_RECEIVE_ID_TYPE: ${{ vars.FEISHU_RECEIVE_ID_TYPE }}
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          MAX_PAPERS: ${{ inputs.max_papers }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "$MAX_PAPERS" ]; then
+            ARGS="$ARGS --max-papers $MAX_PAPERS"
+          fi
+          python main.py $ARGS
 
-      - name: 提交更新后的 seen_ids.json
+      - name: 提交归档与去重记录
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/seen_ids.json
-          git add papers/ 2>/dev/null || true
-          # 只在文件有变化时提交
-          git diff --staged --quiet || git commit -m "papers: weekly digest [$(date +'%Y-%m-%d')]"
-          git push
+          git add data/seen_ids.json papers/
+          if git diff --staged --quiet; then
+            echo "没有变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "papers: weekly digest [$(TZ=Asia/Shanghai date +'%Y-%m-%d')]"
+          # 万一远端有新提交，rebase 后重试
+          for attempt in 1 2 3; do
+            if git pull --rebase --autostash && git push; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "推送失败，请检查仓库权限" >&2
+          exit 1
