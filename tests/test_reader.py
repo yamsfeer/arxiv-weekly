@@ -67,3 +67,21 @@ def test_save_index_lists_issues_newest_first(tmp_path):
     html = page.read_text(encoding="utf-8")
     assert html.index("2026-11-19/") < html.index("2026-11-12/")
     assert "2 期" in html
+
+
+def test_render_has_sidebar_nav_and_drawer():
+    papers = [paper("2611.00001"), paper("2611.00002", title_zh="第二篇")]
+    html = render_issue(papers, {}, "2026-11-19")
+
+    assert 'class="sidebar"' in html
+    assert 'class="nav"' in html
+    assert 'href="#p1"' in html
+    assert 'href="#p2"' in html
+    assert 'class="menu-btn"' in html
+    assert "IntersectionObserver" in html
+
+
+def test_save_issue_writes_papers_json(tmp_path):
+    save_issue([paper()], {"2611.00001": brief()}, "2026-11-19", base_dir=tmp_path)
+    data = json.loads((tmp_path / "2026-11-19" / "papers.json").read_text(encoding="utf-8"))
+    assert data[0]["id"] == "2611.00001"

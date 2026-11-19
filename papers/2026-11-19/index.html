@@ -3,68 +3,127 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1d5cff">
+<meta name="theme-color" content="#f7f5f0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>论文精读 · 2026-11-19</title>
 <style>
-:root{--bg:#f5f6f8;--card:#fff;--ink:#17202a;--muted:#63707c;--accent:#1d5cff;--line:#e6eaf0;--soft:#f0f4ff}
+:root{
+  --bg:#f7f5f0; --card:#fffdf9; --ink:#1f1e1c; --muted:#6f6a62;
+  --line:#e7e1d6; --accent:#c96442; --accent-soft:#f8ede7; --soft:#f3efe7;
+  --serif:"Tiempos Text","Iowan Old Style",Georgia,"Songti SC","Noto Serif SC",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Inter","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:720px;margin:0 auto;padding:22px 16px 64px}
-.hero{padding:8px 4px 18px}
-.hero .tag{display:inline-block;font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:700}
-.hero h1{font-size:26px;line-height:1.3;margin:6px 0 6px}
-.hero p{margin:0;color:var(--muted);font-size:14px}
-.toc{display:flex;gap:8px;overflow-x:auto;padding:4px 0 18px;scrollbar-width:none}
-.toc::-webkit-scrollbar{display:none}
-.toc a{flex:0 0 auto;font-size:13px;color:var(--muted);text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;white-space:nowrap}
-.paper{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 18px 16px;margin:0 0 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
-.kicker{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
-.num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:12px}
-.badge{background:var(--soft);color:var(--accent);border-radius:999px;padding:2px 8px;font-weight:600}
-.paper h2{font-size:21px;line-height:1.45;margin:10px 0 6px}
-.en{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 14px}
-.one-liner{background:var(--soft);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 12px;font-size:16px;line-height:1.7;margin:0 0 6px}
-.one-liner b,.takeaway b{display:block;font-size:11px;letter-spacing:.12em;color:var(--accent);margin-bottom:2px}
-section{margin:16px 0 0}
-section h3{font-size:13px;color:var(--muted);margin:0 0 4px;font-weight:700;letter-spacing:.04em}
-section p{margin:0;font-size:15.5px}
-.result{font-weight:600}
-.terms dl{margin:0;display:grid;gap:8px}
-.term{display:grid;grid-template-columns:88px 1fr;gap:10px;font-size:15px}
-.term dt{font-weight:700;color:var(--ink)}
-.term dd{margin:0;color:#3b4652}
-.takeaway{margin:16px 0 0;padding:10px 12px;border:1px dashed #c9d6f5;border-radius:10px;background:#fafbff;font-size:15px}
-.checks{margin:4px 0 0;padding-left:20px;font-size:15px}
-.checks li{margin:2px 0}
-details{margin:14px 0 0;font-size:14px;color:var(--muted)}
-details summary{cursor:pointer}
-.paper-foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
-.reading{margin:0;color:var(--muted);font-size:13px}
-.links{margin:8px 0 0;display:flex;gap:16px;flex-wrap:wrap}
-.links a{color:var(--accent);text-decoration:none;font-size:14px;font-weight:600}
-.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.85 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+.shell{max-width:1080px;margin:0 auto;padding:44px 24px 96px;display:grid;grid-template-columns:252px minmax(0,1fr);gap:64px;align-items:start}
+
+/* 左侧目录 */
+.sidebar{position:sticky;top:36px}
+.brand{display:inline-block;font:600 13px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);text-decoration:none}
+.side-date{font-family:var(--serif);font-size:19px;line-height:1.4;margin:10px 0 4px}
+.side-count{color:var(--muted);font-size:13px;margin:0 0 22px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:9px 10px 9px 8px;border-radius:9px;text-decoration:none;color:#4d4942;font-size:13.5px;line-height:1.45;border-left:2px solid transparent;transition:background .15s,color .15s}
+.nav a:hover{background:var(--soft)}
+.nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px;padding-top:1px}
+.nav a .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nav a.active{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent)}
+.nav a.active .n{color:var(--accent)}
+.side-foot{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.side-foot a{color:var(--muted);text-decoration:none}
+.side-foot a:hover{color:var(--accent)}
+
+/* 顶部栏（移动端） */
+.topbar{display:none;position:sticky;top:0;z-index:30;align-items:center;gap:12px;padding:10px 16px;background:rgba(247,245,240,.92);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.menu-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 13px;font:600 13px var(--sans)}
+.topbar-title{font-family:var(--serif);font-size:15px;color:#3d3933}
+.overlay{display:none;position:fixed;inset:0;background:rgba(31,30,28,.32);z-index:20}
+.overlay.show{display:block}
+
+/* 内容 */
+.hero{padding:2px 2px 10px}
+.hero h1{font-family:var(--serif);font-weight:600;font-size:38px;line-height:1.2;letter-spacing:-.015em;margin:6px 0 10px}
+.hero p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.7}
+.paper{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:30px 32px 24px;margin:28px 0 0;box-shadow:0 1px 2px rgba(60,50,35,.04),0 8px 24px -18px rgba(60,50,35,.22);scroll-margin-top:76px}
+.kicker{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}
+.num{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;background:var(--accent);color:#fff;font-weight:600;font-size:12px}
+.badge{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font-weight:600;font-size:11.5px}
+.date{font-variant-numeric:tabular-nums}
+.paper h2{font-family:var(--serif);font-weight:600;font-size:25px;line-height:1.38;letter-spacing:-.01em;margin:12px 0 6px}
+.en{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 20px}
+.one-liner{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 12px 12px 0;padding:13px 16px;font-size:17.5px;line-height:1.75;margin:0 0 4px}
+.one-liner b,.takeaway b{display:block;font:600 10.5px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+section{margin:22px 0 0}
+section h3{font:600 11.5px/1.4 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
+section p{margin:0;font-size:16.5px;line-height:1.85}
+.result{font-weight:500}
+.terms dl{margin:0;display:grid;gap:10px}
+.term{display:grid;grid-template-columns:118px 1fr;gap:14px;font-size:15.5px;line-height:1.7}
+.term dt{font-weight:600;color:#3d3933}
+.term dd{margin:0;color:#5a554d}
+.takeaway{margin:24px 0 0;padding:14px 16px;border:1px solid #e3d9c8;border-radius:12px;background:var(--soft);font-size:16px;line-height:1.75}
+.checks{margin:4px 0 0;padding-left:20px;font-size:16px;line-height:1.8}
+.checks li{margin:3px 0}
+details{margin:22px 0 0;font-size:14.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+details summary{cursor:pointer;font-weight:600;color:#5a554d}
+details p{margin:10px 0 0;line-height:1.8}
+.paper-foot{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.reading{margin:0;color:var(--muted);font-size:13.5px;line-height:1.7}
+.links{margin:12px 0 0;display:flex;gap:10px;flex-wrap:wrap}
+.links a{display:inline-block;text-decoration:none;font:600 13px var(--sans);color:var(--accent);border:1px solid #e6cdc2;background:#fff;border-radius:999px;padding:7px 14px}
+.links a:hover{background:var(--accent-soft)}
+.foot{color:var(--muted);font-size:12.5px;text-align:center;margin:36px 0 0}
 .foot a{color:var(--muted)}
-.issue-list{list-style:none;padding:0;margin:0}
-.issue-list li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 10px}
-.issue-list a{color:var(--ink);text-decoration:none;font-weight:700;font-size:16px}
-.issue-list .meta{display:block;color:var(--muted);font-size:13px;margin-top:2px}
-@media (prefers-color-scheme: dark){
-  :root{--bg:#0f1216;--card:#161b22;--ink:#e6edf3;--muted:#8b949e;--line:#232b36;--soft:#1a2333}
-  .term dd{color:#c9d1d9}
-  .takeaway{background:#141a24;border-color:#2b3a55}
+.issue-list{list-style:none;padding:0;margin:28px 0 0}
+.issue-list li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 10px}
+.issue-list a{color:var(--ink);text-decoration:none;font-family:var(--serif);font-weight:600;font-size:18px}
+.issue-list .meta{display:block;color:var(--muted);font-size:13px;margin-top:2px;font-family:var(--sans)}
+
+@media (max-width:1023px){
+  .shell{display:block;padding:0 16px 72px}
+  .topbar{display:flex}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:84%;max-width:330px;background:var(--card);border-right:1px solid var(--line);padding:22px 18px;overflow:auto;z-index:25;transform:translateX(-104%);transition:transform .22s ease;box-shadow:0 0 40px rgba(60,50,35,.14)}
+  .sidebar.open{transform:none}
+  .hero{padding:22px 2px 6px}
+  .hero h1{font-size:30px}
+  .paper{padding:22px 20px 18px;border-radius:16px;margin-top:22px}
+  .paper h2{font-size:21px}
+  .term{grid-template-columns:96px 1fr;gap:10px}
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#151412;--card:#1d1b18;--ink:#ece7df;--muted:#a19a8f;--line:#2e2a24;--accent-soft:#3a2822;--soft:#24211c}
+  .topbar{background:rgba(21,20,18,.92)}
+  .nav a{color:#b9b1a5}
+  .nav a.active{color:#e08a68}
+  .term dt{color:#ddd6ca}
+  .term dd{color:#b9b1a5}
+  .reading,details summary{color:#b9b1a5}
+  .links a{background:transparent;border-color:#4a352c}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="hero">
-    <span class="tag">每周论文精读</span>
-    <h1>2026 / 11 / 19 · 6 篇</h1>
-    <p>先看人话版，再决定要不要读原文。AI 编码 / 编程代理 · LLM 应用工程 · Web 全栈 / 前端工程 · 开发者工具 / 测试 / 工程效率</p>
-  </div>
-  <nav class="toc"><a href="#p1">1. 面向编码智能体的免评估递归自我改进</a><a href="#p2">2. 利用超时级联降低编码智能体的推理成本</a><a href="#p3">3. 随处快思：为任意智能体工作流的决策点</a><a href="#p4">4. 量化在遗留软件系统中改造引入检索增强</a><a href="#p5">5. 当《人月神话》遇上智能体 Web 系</a><a href="#p6">6. CR-Bench-v2：评估 AI </a></nav>
-  
+<header class="topbar">
+  <button class="menu-btn" aria-label="打开目录">☰ 目录</button>
+  <span class="topbar-title">2026 / 11 / 19</span>
+</header>
+<div class="overlay"></div>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="../">Weekly Papers</a>
+    <p class="side-date">2026 / 11 / 19</p>
+    <p class="side-count">6 篇 · AI 编码 / 编程代理 · LLM 应用工程 · Web 全栈 / 前端工程 · 开发者工具 / 测试 / 工程效率</p>
+    <nav class="nav"><a href="#p1"><span class="n">01</span><span class="t">面向编码智能体的免评估递归自我改进</span></a><a href="#p2"><span class="n">02</span><span class="t">利用超时级联降低编码智能体的推理成本</span></a><a href="#p3"><span class="n">03</span><span class="t">随处快思：为任意智能体工作流的决策点提供统一 Sy…</span></a><a href="#p4"><span class="n">04</span><span class="t">量化在遗留软件系统中改造引入检索增强生成的侵入性</span></a><a href="#p5"><span class="n">05</span><span class="t">当《人月神话》遇上智能体 Web 系统：面向可扩展…</span></a><a href="#p6"><span class="n">06</span><span class="t">CR-Bench-v2：评估 AI 代码审查智能体…</span></a></nav>
+    <div class="side-foot"><a href="../">← 往期</a></div>
+  </aside>
+  <main class="content">
+    <div class="hero">
+      <h1>6 篇值得看的论文</h1>
+      <p>先看人话版，再决定要不要读原文。</p>
+    </div>
+    
 <article class="paper" id="p1">
   <header class="paper-head">
     <div class="kicker"><span class="num">1</span><span class="badge">AI 编码 / 编程代理</span><span class="date">2026-11-16</span></div>
@@ -227,7 +286,44 @@ details summary{cursor:pointer}
     <p class="links"><a href="https://arxiv.org/abs/2611.02566">arXiv 原文</a><a href="https://arxiv.org/pdf/2611.02566">PDF</a></p>
   </footer>
 </article>
-  <p class="foot">内容由 LLM 依据论文生成，数字与结论请以原文为准 · <a href="../">往期</a></p>
+    <p class="foot">内容由 LLM 依据论文生成，数字与结论请以原文为准</p>
+  </main>
 </div>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+  var papers = Array.prototype.slice.call(document.querySelectorAll('.paper'));
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var id = '#' + entry.target.id;
+        links.forEach(function (link) {
+          link.classList.toggle('active', link.getAttribute('href') === id);
+        });
+      });
+    }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+    papers.forEach(function (paper) { io.observe(paper); });
+  }
+  if (links.length) links[0].classList.add('active');
+
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.querySelector('.overlay');
+  var button = document.querySelector('.menu-btn');
+  function close() {
+    if (!sidebar) return;
+    sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('show');
+  }
+  if (button) {
+    button.addEventListener('click', function () {
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+    });
+  }
+  if (overlay) overlay.addEventListener('click', close);
+  links.forEach(function (link) { link.addEventListener('click', close); });
+})();
+</script>
 </body>
 </html>
