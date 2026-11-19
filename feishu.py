@@ -66,7 +66,8 @@ def _split_blocks(blocks: List[str], max_bytes: int = MAX_CARD_BYTES) -> List[Li
 
 
 def _card(title: str, blocks: List[str], part: int, total_parts: int,
-          archive_url: Optional[str], summary: Optional[str], color: str) -> Dict:
+          archive_url: Optional[str], summary: Optional[str], color: str,
+          reader_url: Optional[str] = None) -> Dict:
     elements: List[Dict] = []
     if total_parts > 1:
         elements.append({"tag": "markdown", "content": f"**第 {part}/{total_parts} 部分**"})
@@ -77,20 +78,27 @@ def _card(title: str, blocks: List[str], part: int, total_parts: int,
         elements.append({"tag": "markdown", "content": block})
         elements.append({"tag": "hr"})
 
-    if archive_url:
-        elements.append(
+    actions = []
+    if reader_url:
+        actions.append(
             {
-                "tag": "action",
-                "actions": [
-                    {
-                        "tag": "button",
-                        "text": {"tag": "plain_text", "content": "📖 查看完整归档"},
-                        "type": "primary",
-                        "url": archive_url,
-                    }
-                ],
+                "tag": "button",
+                "text": {"tag": "plain_text", "content": "📖 中文精读"},
+                "type": "primary",
+                "url": reader_url,
             }
         )
+    if archive_url:
+        actions.append(
+            {
+                "tag": "button",
+                "text": {"tag": "plain_text", "content": "📄 归档 Markdown"},
+                "type": "default" if reader_url else "primary",
+                "url": archive_url,
+            }
+        )
+    if actions:
+        elements.append({"tag": "action", "actions": actions})
     elements.append(
         {
             "tag": "note",
@@ -109,14 +117,27 @@ def _card(title: str, blocks: List[str], part: int, total_parts: int,
     }
 
 
-def build_cards(papers: List[Dict], date_str: str, archive_url: Optional[str] = None) -> List[Dict]:
+def build_cards(
+    papers: List[Dict],
+    date_str: str,
+    archive_url: Optional[str] = None,
+    reader_url: Optional[str] = None,
+) -> List[Dict]:
     """生成 1~N 张卡片；论文少的时候就是一张。"""
     title = f"📚 每周论文精选 · {format_date(date_str)} · {len(papers)} 篇"
-    blocks = [card_paper_markdown(paper, i) for i, paper in enumerate(papers, 1)]
+    blocks = [
+        card_paper_markdown(paper, i, f"{reader_url}#p{i}" if reader_url else None)
+        for i, paper in enumerate(papers, 1)
+    ]
     groups = _split_blocks(blocks)
     summary = f"共 **{len(papers)}** 篇 · {topic_summary(papers)}"
     return [
-        _card(title, group, part, len(groups), archive_url if part == len(groups) else None, summary, "blue")
+        _card(
+            title, group, part, len(groups),
+            archive_url if part == len(groups) else None,
+            summary, "blue",
+            reader_url=reader_url if part == len(groups) else None,
+        )
         for part, group in enumerate(groups, 1)
     ]
 
@@ -271,9 +292,10 @@ def send_digest(
     papers: List[Dict],
     date_str: str,
     archive_url: Optional[str] = None,
+    reader_url: Optional[str] = None,
     dry_run: bool = False,
 ) -> None:
-    cards = build_cards(papers, date_str, archive_url)
+    cards = build_cards(papers, date_str, archive_url, reader_url)
     if dry_run:
         print("[feishu] dry-run，卡片 JSON 如下（未发送）：")
         print(json.dumps(cards, ensure_ascii=False, indent=2))
@@ -305,6 +327,21 @@ def send_test(dry_run: bool = False) -> None:
         return
     send_card(card)
     print("[feishu] 测试卡片已发送，去飞书看一眼")
+
+
+def reader_url(date_str: str) -> Optional[str]:
+    """中文精读页地址：GitHub Pages 上的 papers/{date}/。
+
+    可用 READER_BASE_URL 覆盖（以后换成自己的域名时用）。
+    """
+    base = os.environ.get("READER_BASE_URL", "").strip().rstrip("/")
+    if not base:
+        repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
+        if not repo or "/" not in repo:
+            return None
+        owner, name = repo.split("/", 1)
+        base = f"https://{owner.lower()}.github.io/{name}"
+    return f"{base}/papers/{date_str}/"
 
 
 def github_archive_url(date_str: str) -> Optional[str]:

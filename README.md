@@ -2,7 +2,9 @@
 
 每周一 09:00（北京时间）自动从 arXiv 抓取论文，用 DeepSeek 打分、翻译，以**飞书交互式卡片**推送到手机。
 
-卡片里能直接读中文标题、中文摘要和原文链接；每期在 `papers/` 留一份 Markdown 归档（`latest.md` 固定链接），卡片底部有按钮直达。不依赖任何第三方推送工具，消息长期保留、可搜索。
+卡片里能直接读中文标题和摘要。点标题不进英文原文，而是进**中文精读页**：每篇有人话版导读（一句话、背景、为什么值得读、怎么做的、关键结果、术语、自测），看完再决定要不要读原文。
+
+每期在 `papers/` 留一份 Markdown 归档和精读页；`papers/latest.md` 是固定链接。不依赖任何第三方推送工具，消息长期保留、可搜索。
 
 **关注方向（每周 6 篇）：**
 
@@ -132,11 +134,18 @@ Fork 到你自己的 GitHub 账号下即可（公开 / 私有都行）。
 
 > 从微信版迁移过来：飞书配好后可以把 `SERVERCHAN_SENDKEY` 这个 Secret 删掉，代码里已经没有微信推送了。
 
-### 4. 开启 Actions 写权限
+### 4. 开启 GitHub Pages
+
+**Settings → Pages** → Source 选 **Deploy from a branch**，分支选 `main`，目录选 `/ (root)`。
+
+站点地址是 `https://<你的用户名>.github.io/arxiv-weekly/`，每期精读页在 `papers/YYYY-MM-DD/`。
+以后换成自己的域名，只要设环境变量 `READER_BASE_URL`，卡片里的链接就会跟着换。
+
+### 5. 开启 Actions 写权限
 
 **Settings → Actions → General → Workflow permissions** → 选 **Read and write permissions**（要提交 `papers/` 和 `data/seen_ids.json`）。
 
-### 5. 验证
+### 6. 验证
 
 **Actions → Weekly Paper Digest → Run workflow**，把 `dry_run` 勾上先跑一次（不推送），确认抓取、打分和翻译正常；再手动跑一次正式的。
 
@@ -171,6 +180,7 @@ DEEPSEEK_API_KEY=sk-xxx python main.py --dry-run
 | `--test-push` | 只发一张测试卡片，验证飞书配置 |
 | `--max-papers N` | 本次推送 N 篇（默认 6） |
 | `--no-translate` | 跳过翻译，直接用英文原文 |
+| `--no-brief` | 跳过 PDF/LLM 人话版，用摘要兜底 |
 
 ---
 
@@ -182,7 +192,7 @@ DEEPSEEK_API_KEY=sk-xxx python main.py --dry-run
 
 ## 费用
 
-每次 6 篇翻译 + 约 75 篇打分，DeepSeek 单次约 ¥0.1；arXiv 与 Semantic Scholar 免费。
+每次：约 75 篇打分 + 6 篇翻译 + 6 篇人话版（含 PDF 全文），DeepSeek 单次约 ¥0.3；arXiv 与 Semantic Scholar 免费。
 
 ---
 
@@ -198,11 +208,14 @@ DEEPSEEK_API_KEY=sk-xxx python main.py --dry-run
 ├── selector.py                    # 按配额轮转 + 图形学替补
 ├── semantic_fetcher.py            # Semantic Scholar 批量查引用数
 ├── translator.py                  # DeepSeek 中文翻译
+├── brief.py                       # 抓 PDF 全文 + 生成人话版导读
+├── reader.py                      # 渲染手机版中文精读页 / 往期索引
 ├── digest.py                      # 归档 Markdown / 卡片文案渲染
 ├── feishu.py                      # 飞书卡片构建 + webhook / 自建应用发送
 ├── paper_saver.py                 # 写入 papers/、latest.md 和归档索引
 ├── store.py                       # seen_ids（带日期、自动过期清理）
 ├── papers/README.md               # 每周归档索引（自动生成）
+├── papers/YYYY-MM-DD/index.html   # 每期中文精读页（自动生成）
 ├── data/seen_ids.json             # 已推送论文记录（自动更新）
 └── tests/                         # 单元测试（pytest）
 ```
@@ -211,13 +224,9 @@ DEEPSEEK_API_KEY=sk-xxx python main.py --dry-run
 
 ## 下一步（还没做）
 
-现在的卡片是"翻译 + 摘要"，但**读懂一篇论文**通常还缺三样东西：
-
-1. **人话版导读**：一句话结论、为什么值得读、用类比讲清方法、关键数字、3 个术语、2 个自测问题。
-2. **中文阅读页**：点标题不要直接跳到英文 arXiv，而是先看一页中文精读，再决定要不要读原文。
-3. **针对论文提问**：比如"这个方法和我做的项目有什么关系"、"第三段的假设是什么"。
-
-计划按这个顺序做，每步都能单独用。
+1. **人话版导读**：已完成。见 `brief.py`，字段是一句话、背景、为什么值得读、怎么做（带类比）、关键结果、三个术语、只记一件事、自测、怎么读。
+2. **中文精读页**：已完成。见 `reader.py`，托管在 GitHub Pages。
+3. **针对论文提问**：还没做。目标是可以问"这个方法和我做的项目有什么关系""第三段的假设是什么"，回答要引用原文段落。
 
 ---
 

@@ -91,12 +91,15 @@ def archive_markdown(papers: List[Dict], date_str: str, repo_url: Optional[str] 
     return "\n".join(lines).rstrip() + "\n"
 
 
-def card_paper_markdown(paper: Dict, index: int) -> str:
-    """飞书卡片里单篇论文的 lark_md 片段。"""
+def card_paper_markdown(paper: Dict, index: int, link: Optional[str] = None) -> str:
+    """飞书卡片里单篇论文的 lark_md 片段。
+
+    link 用来把中文标题指向中文精读页；英文标题始终指向 arXiv。
+    """
     view = paper_view(paper, index)
     return (
-        f"**[{view['index']}. {view['title_zh']}]({view['url']})**\n"
-        f"*{view['title']}*\n"
+        f"**[{view['index']}. {view['title_zh']}]({link or view['url']})**\n"
+        f"[*{view['title']}*]({view['url']})\n"
         f"{view['meta']}\n\n"
         f"{view['abstract']}"
     )

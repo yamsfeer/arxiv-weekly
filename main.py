@@ -8,10 +8,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 
+import brief
 import feishu
+import reader
 import store
 from arxiv_fetcher import fetch_papers
 from config import MAX_PAPERS, today_str
@@ -32,12 +35,14 @@ def parse_args(argv=None):
     parser.add_argument("--test-push", action="store_true", help="发一张测试卡片，验证飞书配置")
     parser.add_argument("--max-papers", type=int, default=None, help=f"本次推送篇数（默认 {MAX_PAPERS}）")
     parser.add_argument("--no-translate", action="store_true", help="跳过翻译，直接用英文原文")
+    parser.add_argument("--no-brief", action="store_true", help="跳过 PDF/LLM 人话版，用摘要兜底")
     return parser.parse_args(argv)
 
 
 def run(args) -> int:
     date_str = today_str()
     archive_url = feishu.github_archive_url(date_str)
+    page_url = feishu.reader_url(date_str)
 
     if args.test_push:
         feishu.send_test(dry_run=args.dry_run)
@@ -77,17 +82,30 @@ def run(args) -> int:
         print("[translate] 没有 DEEPSEEK_API_KEY，跳过翻译，保留英文原文")
     selected = translate_papers(selected, skip=skip_translate)
 
+    # 人话版：抓 PDF 全文，按固定字段生成导读；没有 key 时用摘要兜底
+    brief_client = get_client(api_key) if (api_key and not args.no_brief) else None
+    briefs = brief.generate_briefs(
+        selected,
+        client=brief_client,
+        use_pdf=bool(brief_client),
+    )
+
     if args.dry_run:
         from digest import archive_markdown
 
         print("\n[dry-run] 归档内容如下：\n")
         print(archive_markdown(selected, date_str, archive_url))
-        feishu.send_digest(selected, date_str, archive_url, dry_run=True)
+        first = selected[0]["id"]
+        print("\n[dry-run] 第一篇人话版：\n")
+        print(json.dumps(briefs.get(first, {}), ensure_ascii=False, indent=2))
+        feishu.send_digest(selected, date_str, archive_url, page_url, dry_run=True)
         return 0
 
     # 先落盘归档，这样卡片里的归档链接点开就是本期内容
     save_papers(selected, date_str)
-    feishu.send_digest(selected, date_str, archive_url)
+    reader.save_issue(selected, briefs, date_str)
+    reader.save_index()
+    feishu.send_digest(selected, date_str, archive_url, page_url)
 
     # 只把真正推送过的记为已读：没选中的论文下周还能再竞争一次
     seen = store.save(store.mark(seen, [p["id"] for p in selected]))
