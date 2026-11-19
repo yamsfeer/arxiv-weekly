@@ -2,99 +2,99 @@
 
 > 共 6 篇 · AI 编码 / 编程代理 2 · LLM 应用工程 2 · Web 全栈 / 前端工程 1 · 开发者工具 / 测试 / 工程效率 1
 
-## 1. 从代码仓库到训练环境：以环境演化循环扩展长程编程智能体
+## 1. 面向编码智能体的免评估递归自我改进
 
-**[From Repositories to Training Environments: Scaling Long-Horizon Coding Agents with Environment Evolution Loop](https://arxiv.org/abs/2611.21152)**
+**[Evaluation-Free Recursive Self-Improvement for Coding Agents](https://arxiv.org/abs/2611.21056)**
 
-AI 编码 / 编程代理 · 2026-11-16 · 🆕 新论文 · cs.CL
+AI 编码 / 编程代理 · 2026-11-16 · 📊 被引 1 次 · cs.CL / cs.NE
 
-提出 RepoFactory 自动化流水线，将真实代码库转为可验证环境，使智能体依据语言规范从零构建完整项目；其环境演化循环利用代理反馈优化有效性、结构耦合与实现范围。在17个软件领域生成10,159个环境。训练 Qwen3.5-35B-A3B 得 RepoHorizen-35B-A3B，在 NL2Repo-Bench 提升22.6个百分点，五项基准平均提升8.5个百分点，显著优于未演化环境。
+提出 ELITE：演化中不评估下游任务，而是每代提出多样改进、自同一父代独立实现，检视互补、冗余与冲突机制后整合为一致后代，仅做结构与运行有效性检查。SWE-bench Pro 由 60.0% 升至 85.6%（DGM 86.7%、HGM 88.3%），零候选评估，演化耗时降 8.8×/3.2×；跨基准迁移达 73.3%（Verified）、69.3%（Polyglot）。
 
-💡 万级可验证仓库环境合成，训练编码agent，工程可复现
+💡 免下游评测的自改进智能体，可落地且指标扎实可复现
 
-✍️ Yang Tian、Tianyu Zheng、Xiyuan Yang
+✍️ Zhe Ren、Guowei Rong、Yimeng Chen
 
-[arXiv:2611.21152](https://arxiv.org/abs/2611.21152) · [PDF](https://arxiv.org/pdf/2611.21152)
-
----
-
-## 2. 上下文是有代价的：前缀缓存下编程智能体的上下文增删
-
-**[Context Has a Price: Adding and Removing Context for LLM Coding Agents under Prefix Caching](https://arxiv.org/abs/2611.22238)**
-
-AI 编码 / 编程代理 · 2026-11-17 · 🆕 新论文 · cs.AI
-
-在超过2万次开源模型于 SWE-bench 等基准的运行中，分别计量未缓存输入、缓存输入与输出 token。加入检索代码可减少18–34%读取与搜索命令，却使成本增加33–42%；删除旧观察在无缓存折扣时节省19–36%，在一折缓存时反增38–116%；更短提示不必然更省，因智能体可能增加步骤；并发实验共享缓存前缀还会扭曲成本比较。
-
-💡 前缀缓存下上下文增删的真实成本测度，反直觉且有用
-
-✍️ Zerui Yang、Miaomiao Dong、Quan Xue
-
-[arXiv:2611.22238](https://arxiv.org/abs/2611.22238) · [PDF](https://arxiv.org/pdf/2611.22238)
+[arXiv:2611.21056](https://arxiv.org/abs/2611.21056) · [PDF](https://arxiv.org/pdf/2611.21056)
 
 ---
 
-## 3. ARISE：面向精准且低成本企业智能体的实用自演化记忆
+## 2. 利用超时级联降低编码智能体的推理成本
 
-**[ARISE: Practical Self-Evolving Memory for Accurate and Cost-Efficient Enterprise Agents](https://arxiv.org/abs/2611.23588)**
+**[Reducing Inference Cost of Coding Agents with Timeout Cascades](https://arxiv.org/abs/2611.24324)**
 
-LLM 应用工程 · 2026-11-17 · 🆕 新论文 · cs.AI / cs.MA
+AI 编码 / 编程代理 · 2026-11-18 · 🆕 新论文 · cs.AI / cs.SE
 
-ARISE 使企业智能体无需更新模型权重、工具或流程逻辑，即可从失败中演化记忆：由模型或教师模型归因失败、提出修正，保存为可检索的微观记忆并整合为宏观规则，仅在留出集准确率提升时接受更新。在14个企业流程领域、5个模型上，ARISE-Teacher 较基线在 SOP-Bench 和 τ²-bench 分别提升10.9和5.8个百分点，优于 GEPA；ARISE-Self 在 SOP-Bench 提升10.0个百分点，且调用与输出 token 更少。
+在软件工程基准上评测 36 个 2024 年以来的开源权重模型，发现小型模型与大型模型的准确率差距主要集中于难题。据此提出先试小模型、必要时升级大模型的混合推理（超时级联），在 SWE-bench Verified 上最多降低 33% GPU 小时成本、全部任务降低 16.4%，且不损准确率，效果接近 oracle 式任务路由器。
 
-💡 失败驱动的agent记忆自演化，免改权重，实验扎实可落地
+💡 小模型先跑超时升级，省33%算力，工程直接可用
 
-✍️ Jiangyun Zhang、Zhou Tang、Kristen Surrao
+✍️ Boxi Zhou、German Sviridov、Dmitrii Ustiugov
 
-[arXiv:2611.23588](https://arxiv.org/abs/2611.23588) · [PDF](https://arxiv.org/pdf/2611.23588)
-
----
-
-## 4. 智能体框架工程 Beta：以需求为中心的智能体框架演化
-
-**[Agentic Harness Engineering Beta: Requirement-Centered Evolution of Agent Harnesses](https://arxiv.org/abs/2611.24924)**
-
-LLM 应用工程 · 2026-11-18 · 🆕 新论文 · cs.SE / cs.AI
-
-现有智能体框架演化常忽视隐性需求，依赖单一演化智能体与基准分数，易产生狭窄补丁和局部最优。AHE-Beta 引入以需求为中心的闭环：模拟用户以问题形式提出需求，团队式修改形成可泛化变更，仅在解决已验证需求并通过评审时合并。留出任务上 pass@1 由21.9%升至33.3%，token 减少40.8%，优于 Claude Code、Meta-Harness 和 AHE；盲测48组中31组偏好 AHE-Beta，五项维度评分均更高，增益可迁移至其他模型。
-
-💡 以需求驱动的harness演化，pass@1显著提升且有人类A/B，直接可借鉴
-
-✍️ Jiahang Lin、Jiahao Chen、Yiding Wang
-
-[arXiv:2611.24924](https://arxiv.org/abs/2611.24924) · [PDF](https://arxiv.org/pdf/2611.24924)
+[arXiv:2611.24324](https://arxiv.org/abs/2611.24324) · [PDF](https://arxiv.org/pdf/2611.24324)
 
 ---
 
-## 5. Injectra：为基于 Web 的桌面应用改造可扩展性
+## 3. 随处快思：为任意智能体工作流的决策点提供统一 System-1
 
-**[Injectra: Retrofitting Extensibility into Web-Based Desktop Applications](https://arxiv.org/abs/2611.20713)**
+**[Thinking Fast, Anywhere: One System-1 for the Decision Points of Any Agent Workflow](https://arxiv.org/abs/2611.23751)**
 
-Web 全栈 / 前端工程 · 2026-11-16 · 🆕 新论文 · cs.SE / cs.HC
+LLM 应用工程 · 2026-11-18 · 🆕 新论文 · cs.AI / cs.CL / cs.LG
 
-提出 Injectra，一种面向现有桌面客户端的通用代码注入与功能增强系统，适用于 Electron 内嵌浏览器或 Tauri 系统 WebView 构建界面的应用。系统解耦宿主集成与增强代码，结合运行时集成与启动前引导，通过统一通道注入 JavaScript、HTML 和 CSS，以修改界面渲染、交互行为并扩展客户端功能，并提供 CLI 供外部工具、AI 智能体与 MCP 复用。已在38款 macOS 应用上全部注入成功，并验证 Windows 版本；基于选择标注的 LLM 工具可生成并注入增强代码。
+提出 AnyS1，将人工编写的流程技能转化为跨领域通用的决策点来源；离线挖掘 1000 余项公开技能中的可枚举决策，在隔离容器采集执行轨迹构建 Any-DP，训练单个 4B 指针式 System-1。运行时常规决策一次前向完成，置信度低则回退 System-2。在三个未见基准上保持任务可靠性，单回合成本降 75–91%，模型调用时间降 63–92%，并支持零样本阈值迁移。
 
-💡 Electron/WebView应用JS注入扩展，CLI+MCP可复用
+💡 单次前向替代System-2决策，降本75-91%，agent落地直接可用
 
-✍️ Qin Sun
+✍️ Rui Li、Liyang He、Zheng Zhang
 
-[arXiv:2611.20713](https://arxiv.org/abs/2611.20713) · [PDF](https://arxiv.org/pdf/2611.20713)
+[arXiv:2611.23751](https://arxiv.org/abs/2611.23751) · [PDF](https://arxiv.org/pdf/2611.23751)
 
 ---
 
-## 6. 少提示，多推断：静态分析引导的 Python 大语言模型类型标注
+## 4. 量化在遗留软件系统中改造引入检索增强生成的侵入性
 
-**[Prompt Less, Infer More: Static Analysis-Guided LLM Type Annotation for Python](https://arxiv.org/abs/2610.41617)**
+**[Quantifying the Intrusiveness of Retrofitting Retrieval-Augmented Generation onto Legacy Software Systems](https://arxiv.org/abs/2611.23931)**
 
-开发者工具 / 测试 / 工程效率 · 2026-10-30 · 🆕 新论文 · cs.SE
+LLM 应用工程 · 2026-11-18 · 🆕 新论文 · cs.SE
 
-类型标注可提升 Python 程序的可维护性与可靠性，但人工标注耗时易错，实际项目普遍标注不足。现有 LLM 类型推断常在准确率与效率间取舍，未充分利用项目级类型证据。我们提出 SALT，由静态分析引导 LLM：静态解析类型、确定查询优先级并构建简洁的类型感知上下文。在 12 个真实项目上，SALT 准确率最优，LLM 成本较强基线降低达 78.5%，且在 GPT-5.5 上同样有效。
+提出三种改造模式（sidecar、SDK 嵌入、朴素侵入式）分类及遗留侵入度评分 LIS/LIS-X，在五个遗留系统上静态评估，并将三种模式作为独立进程实测。代码层面 sidecar < SDK 嵌入 < 朴素侵入式在五系统与 2000 种随机权重下均成立。实测 sidecar 无可检测延迟（0.07 ms），另两种增加 569 与 475 ms 且无差异；二者均传导依赖延迟，并在 RAG 快速失败时返回缺少 AI 字段的成功响应。
 
-💡 静态分析引导LLM补类型标注，降本78%，AI编程工具可直接用
+💡 RAG接入遗留系统的侵入度量化，有代码与实测，工程可用
 
-✍️ Wonseok Oh、Michael Pradel、Hakjoo Oh
+✍️ K. M. Tahlil Mahfuz Faruk、Rakib Abdullah
 
-[arXiv:2610.41617](https://arxiv.org/abs/2610.41617) · [PDF](https://arxiv.org/pdf/2610.41617)
+[arXiv:2611.23931](https://arxiv.org/abs/2611.23931) · [PDF](https://arxiv.org/pdf/2611.23931)
+
+---
+
+## 5. 当《人月神话》遇上智能体 Web 系统：面向可扩展开发的结构化协调
+
+**[When the Mythical Man-Month Meets Agentic Web Systems: Structured Coordination for Scalable Development](https://arxiv.org/abs/2611.19140)**
+
+Web 全栈 / 前端工程 · 2026-11-14 · 🆕 新论文 · cs.SE / cs.AI
+
+研究协作智能体系统中智能体数量、单智能体 token 消耗与协调开销的关系，在复杂 Web 软件开发任务上发现非线性缩放：随智能体增多，单智能体 token 消耗先降后趋于饱和。据此提出外科手术团队模型（STM），通过角色专门化、受限的智能体间通信与协调者中介的任务聚合组织智能体。全栈 Web 开发实验显示，STM 的任务完成质量与 token 消耗与代表性基线相当，但执行延迟更高。
+
+💡 多agent协作规模效应与结构化分工，Web开发场景贴切
+
+✍️ Zhiyao Wu、Zi Liang、Haibo Hu
+
+[arXiv:2611.19140](https://arxiv.org/abs/2611.19140) · [PDF](https://arxiv.org/pdf/2611.19140)
+
+---
+
+## 6. CR-Bench-v2：评估 AI 代码审查智能体的实际效用
+
+**[CR-Bench-v2: Evaluating the Real-World Utility of AI Code Review Agents](https://arxiv.org/abs/2611.02566)**
+
+开发者工具 / 测试 / 工程效率 · 2026-11-02 · 🆕 新论文 · cs.SE / cs.LG
+
+自动代码生成亟需自动审查，但审查依赖 diff 外上下文与设计判断，难以完全自动化。现有基准依赖噪声评论和文本相似度，缺乏标准化。我们提出 CR-Bench，将 SWE-Bench 问题重构为带完整仓库上下文的 PR 审查任务，含 584 个实例及 174 个 Verified 子集，每个实例配已知缺陷、修复和分类标签；提出已知缺陷检出率（KDDR）与有用率。评估八个智能体及 Gemini Code Assist，最强系统 KDDR 仅约 33%，后者为 8.1%。
+
+💡 缺陷导向的代码评审基准，指标明确可直接用于 agent 评测
+
+✍️ Kristen Pereira、Neelabh Sinha、Rajat Ghosh
+
+[arXiv:2611.02566](https://arxiv.org/abs/2611.02566) · [PDF](https://arxiv.org/pdf/2611.02566)
 
 ---
 
