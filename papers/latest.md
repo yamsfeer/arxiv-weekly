@@ -1,183 +1,101 @@
-# 📚 每周论文推荐 · 2026年11月16日
+# 📚 每周论文精选 · 2026年11月19日
 
-> 共 10 篇 · 由 GitHub Actions + DeepSeek 自动生成
+> 共 6 篇 · AI 编码 / 编程代理 2 · LLM 应用工程 2 · Web 全栈 / 前端工程 1 · 开发者工具 / 测试 / 工程效率 1
 
-## 1. DIRT：基于双频段混合与深度补全的图像渲染用于实时新视角合成
+## 1. 从代码仓库到训练环境：以环境演化循环扩展长程编程智能体
 
-**原标题：** DIRT: Depth-completed Image-based Rendering using Two-band Blending for Live Novel-view Synthesis
+**[From Repositories to Training Environments: Scaling Long-Horizon Coding Agents with Environment Evolution Loop](https://arxiv.org/abs/2611.21152)**
 
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-13 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Mathias Harrer、Laura Fink、Noah Lewis |
-| 链接 | [2611.18340v1](http://arxiv.org/abs/2611.18340v1) |
+AI 编码 / 编程代理 · 2026-11-16 · 🆕 新论文 · cs.CL
 
-**摘要：**
+提出 RepoFactory 自动化流水线，将真实代码库转为可验证环境，使智能体依据语言规范从零构建完整项目；其环境演化循环利用代理反馈优化有效性、结构耦合与实现范围。在17个软件领域生成10,159个环境。训练 Qwen3.5-35B-A3B 得 RepoHorizen-35B-A3B，在 NL2Repo-Bench 提升22.6个百分点，五项基准平均提升8.5个百分点，显著优于未演化环境。
 
-现有新视角合成多需逐场景优化，难以实时。本文提出免优化、非神经的实时图像渲染：利用稀疏深度点几何，在目标视图补全深度缓冲，投影多图并以频率感知双频段混合融合，无需训练或场景优化。在RGB-D、车载LiDAR、热像与低光场景验证，实时重建优于先前方法，常规基准具竞争力。
+💡 万级可验证仓库环境合成，训练编码agent，工程可复现
+
+✍️ Yang Tian、Tianyu Zheng、Xiyuan Yang
+
+[arXiv:2611.21152](https://arxiv.org/abs/2611.21152) · [PDF](https://arxiv.org/pdf/2611.21152)
 
 ---
 
-## 2. 模仿自举的多智能体强化学习
+## 2. 上下文是有代价的：前缀缓存下编程智能体的上下文增删
 
-**原标题：** Imitation Bootstrapped Multi-Agent Reinforcement Learning
+**[Context Has a Price: Adding and Removing Context for LLM Coding Agents under Prefix Caching](https://arxiv.org/abs/2611.22238)**
 
-| 字段 | 内容 |
-|------|------|
-| 话题 | AI 应用开发 |
-| 发布时间 | 2026-11-13 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Tony H. Zhang、Connor Mattson、Daniel S. Brown |
-| 链接 | [2611.18543v1](http://arxiv.org/abs/2611.18543v1) |
+AI 编码 / 编程代理 · 2026-11-17 · 🆕 新论文 · cs.AI
 
-**摘要：**
+在超过2万次开源模型于 SWE-bench 等基准的运行中，分别计量未缓存输入、缓存输入与输出 token。加入检索代码可减少18–34%读取与搜索命令，却使成本增加33–42%；删除旧观察在无缓存折扣时节省19–36%，在一折缓存时反增38–116%；更短提示不必然更省，因智能体可能增加步骤；并发实验共享缓存前缀还会扭曲成本比较。
 
-多智能体演示难单人遥操作，R2BC令演示者轮流控制各智能体。本文提出IBMARL，将模仿自举强化学习扩展至合作团队：每步模仿与强化策略各提议动作，集中评论家集成选择组合，并以门控软Q过滤行为克隆损失仅在评论家认可时约束强化策略；训练后各智能体独立执行强化策略。四个合作基准中，两项超越模仿策略2.6–4.2倍，另两项唯一超越，两项超过演示者；真实演示亦优。
+💡 前缀缓存下上下文增删的真实成本测度，反直觉且有用
+
+✍️ Zerui Yang、Miaomiao Dong、Quan Xue
+
+[arXiv:2611.22238](https://arxiv.org/abs/2611.22238) · [PDF](https://arxiv.org/pdf/2611.22238)
 
 ---
 
-## 3. CrossPloit：Python Web应用跨版本PoC迁移基准
+## 3. ARISE：面向精准且低成本企业智能体的实用自演化记忆
 
-**原标题：** CrossPloit: A Benchmark for Cross-Version PoC Migration in Python Web Applications
+**[ARISE: Practical Self-Evolving Memory for Accurate and Cost-Efficient Enterprise Agents](https://arxiv.org/abs/2611.23588)**
 
-| 字段 | 内容 |
-|------|------|
-| 话题 | Web 前后端开发 |
-| 发布时间 | 2026-11-12 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Hung Nguyen-Huu、Nguyen Anh Tuan、Ting Zhang |
-| 链接 | [2611.16588v1](http://arxiv.org/abs/2611.16588v1) |
+LLM 应用工程 · 2026-11-17 · 🆕 新论文 · cs.AI / cs.MA
 
-**摘要：**
+ARISE 使企业智能体无需更新模型权重、工具或流程逻辑，即可从失败中演化记忆：由模型或教师模型归因失败、提出修正，保存为可检索的微观记忆并整合为宏观规则，仅在留出集准确率提升时接受更新。在14个企业流程领域、5个模型上，ARISE-Teacher 较基线在 SOP-Bench 和 τ²-bench 分别提升10.9和5.8个百分点，优于 GEPA；ARISE-Self 在 SOP-Bench 提升10.0个百分点，且调用与输出 token 更少。
 
-漏洞库受影响版本范围常不完整，需可执行证据验证未列版本。本文提出CrossPloit，面向Python Web的跨版本PoC迁移基准，含45个CVE、127个实例，提供固定版本容器、参考PoC、漏洞判据与双重验证。构建确认149个易感旧版本未被四库收录，127个需迁移。18种配置最佳解决58.3%，基线8.7%；攻击向量变化最难，最高37.9%。
+💡 失败驱动的agent记忆自演化，免改权重，实验扎实可落地
+
+✍️ Jiangyun Zhang、Zhou Tang、Kristen Surrao
+
+[arXiv:2611.23588](https://arxiv.org/abs/2611.23588) · [PDF](https://arxiv.org/pdf/2611.23588)
 
 ---
 
-## 4. 大语言模型如何重塑软件工程研究的早期思考
+## 4. 智能体框架工程 Beta：以需求为中心的智能体框架演化
 
-**原标题：** Early Reflections on How Large Language Models are Reshaping Software Engineering Research
+**[Agentic Harness Engineering Beta: Requirement-Centered Evolution of Agent Harnesses](https://arxiv.org/abs/2611.24924)**
 
-| 字段 | 内容 |
-|------|------|
-| 话题 | AI 辅助软件开发 |
-| 发布时间 | 2026-11-11 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | David Williams、Michail Kyrkos、Max Hort |
-| 链接 | [2611.15797v1](http://arxiv.org/abs/2611.15797v1) |
+LLM 应用工程 · 2026-11-18 · 🆕 新论文 · cs.SE / cs.AI
 
-**摘要：**
+现有智能体框架演化常忽视隐性需求，依赖单一演化智能体与基准分数，易产生狭窄补丁和局部最优。AHE-Beta 引入以需求为中心的闭环：模拟用户以问题形式提出需求，团队式修改形成可泛化变更，仅在解决已验证需求并通过评审时合并。留出任务上 pass@1 由21.9%升至33.3%，token 减少40.8%，优于 Claude Code、Meta-Harness 和 AHE；盲测48组中31组偏好 AHE-Beta，五项维度评分均更高，增益可迁移至其他模型。
 
-本文分析ICSE 2019–2026研究与SEIP轨道1918篇论文，发现LLM正重塑软件工程研究且格局高度集中。2023–2026年中美占LLM论文74%，但商业与开放权重模型使用分化；中国5所、美国7所机构贡献本国过半LLM成果。美国仅半数活跃机构参与LLM研究，新加坡为15所中的11所。产业参与LLM研究更多（23.4%对16.9%），纯学术占比更低（63.4%对70.9%）。SEIP轨道77.4%使用商业LLM、40.5%仅用商业模型，研究轨道仅21.2%严格依赖商业模型，更多用开放权重模型。
+💡 以需求驱动的harness演化，pass@1显著提升且有人类A/B，直接可借鉴
+
+✍️ Jiahang Lin、Jiahao Chen、Yiding Wang
+
+[arXiv:2611.24924](https://arxiv.org/abs/2611.24924) · [PDF](https://arxiv.org/pdf/2611.24924)
 
 ---
 
-## 5. TetraCoder：面向神经场的自适应四面体编码
+## 5. Injectra：为基于 Web 的桌面应用改造可扩展性
 
-**原标题：** TetraCoder: Adaptive Tetrahedral Encoding for Neural Fields
+**[Injectra: Retrofitting Extensibility into Web-Based Desktop Applications](https://arxiv.org/abs/2611.20713)**
 
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-13 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Daniele Della Pietra、Antonella Rech、Nicola Conci |
-| 链接 | [2611.18267v1](http://arxiv.org/abs/2611.18267v1) |
+Web 全栈 / 前端工程 · 2026-11-16 · 🆕 新论文 · cs.SE / cs.HC
 
-**摘要：**
+提出 Injectra，一种面向现有桌面客户端的通用代码注入与功能增强系统，适用于 Electron 内嵌浏览器或 Tauri 系统 WebView 构建界面的应用。系统解耦宿主集成与增强代码，结合运行时集成与启动前引导，通过统一通道注入 JavaScript、HTML 和 CSS，以修改界面渲染、交互行为并扩展客户端功能，并提供 CLI 供外部工具、AI 智能体与 MCP 复用。已在38款 macOS 应用上全部注入成功，并验证 Windows 版本；基于选择标注的 LLM 工具可生成并注入增强代码。
 
-隐式与显式几何各有优劣，高效转换极具价值。本文提出TetraCoder：单分辨率、无哈希的自适应四面体编码，将显式四面体空间编码器与隐式SDF相连。所得混合空间为连续分段仿射，使SDF与解析网格精确对应；单分辨率可优化网格优于多分辨率编码，且无哈希碰撞，并借自适应支架支持快速光线追踪与几何/外观编辑。在2D/3D拟合、3D新视角合成、重建和编辑上优于现有方法。
+💡 Electron/WebView应用JS注入扩展，CLI+MCP可复用
+
+✍️ Qin Sun
+
+[arXiv:2611.20713](https://arxiv.org/abs/2611.20713) · [PDF](https://arxiv.org/pdf/2611.20713)
 
 ---
 
-## 6. 基于姿态的动画角色神经服装
+## 6. 少提示，多推断：静态分析引导的 Python 大语言模型类型标注
 
-**原标题：** Pose-based Neural Clothing for Animated Characters
+**[Prompt Less, Infer More: Static Analysis-Guided LLM Type Annotation for Python](https://arxiv.org/abs/2610.41617)**
 
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-13 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Julian N. Heidenreich、Vinicius C. Azevedo、Jakob Buhmann |
-| 链接 | [2611.18253v1](http://arxiv.org/abs/2611.18253v1) |
+开发者工具 / 测试 / 工程效率 · 2026-10-30 · 🆕 新论文 · cs.SE
 
-**摘要：**
+类型标注可提升 Python 程序的可维护性与可靠性，但人工标注耗时易错，实际项目普遍标注不足。现有 LLM 类型推断常在准确率与效率间取舍，未充分利用项目级类型证据。我们提出 SALT，由静态分析引导 LLM：静态解析类型、确定查询优先级并构建简洁的类型感知上下文。在 12 个真实项目上，SALT 准确率最优，LLM 成本较强基线降低达 78.5%，且在 GPT-5.5 上同样有效。
 
-传统服装仿真耗时且调参繁琐。针对动画角色单件服装的准静态生产场景，本文先训练VAE获得平滑潜空间，再逐步将编码器从重建转为由姿态参数与身体表面位移驱动的预测，并引入局部梯度直方图损失抑制过平滑。实验表明可实时生成锐利褶皱、平滑悬垂并保持时序连贯。
+💡 静态分析引导LLM补类型标注，降本78%，AI编程工具可直接用
+
+✍️ Wonseok Oh、Michael Pradel、Hakjoo Oh
+
+[arXiv:2610.41617](https://arxiv.org/abs/2610.41617) · [PDF](https://arxiv.org/pdf/2610.41617)
 
 ---
 
-## 7. 品牌形象约束下的创意产品设计
-
-**原标题：** Creative Product Design under Brand Image Constraints
-
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-13 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Takeshi Onishi、Hiroya Makino、Takahiro Yamaguchi |
-| 链接 | [2611.17762v1](http://arxiv.org/abs/2611.17762v1) |
-
-**摘要：**
-
-工业设计需在隐含约束下进行创意探索。本文以品牌形象为约束，提出品牌感知重设计框架：由产品名生成品牌调研报告，提炼创意方向，并嵌入生成—评价—改写提示的自增强循环。50个任务、5类产品实验表明，该框架较Naive T2I、IP-Adapter/IT-Blender及无约束自增强，在创造力与品牌可识别性间取得更优权衡，汽车和摩托车等高约束类别提升尤明显。
-
----
-
-## 8. FOMOS：面向特征的SDF网格化
-
-**原标题：** FOMOS: Feature-Oriented Meshing of SDFs
-
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-12 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Stefan Ohrhallinger、Amal Dev Parakkat |
-| 链接 | [2611.17458v1](http://arxiv.org/abs/2611.17458v1) |
-
-**摘要：**
-
-FOMOS是一种面向特征的SDF纯几何网格化方法。它仅需一个参数，利用中轴支架高效估计局部特征尺寸，并按特征尺寸采样动态调整分辨率，兼顾曲率、厚度与非局部大特征，减少冗余三角形。实验表明其在运行时间、重建精度和三角形质量上具优势；其轻量变体可处理10k³稀疏输入，并支持即时预览与体仿真加速。
-
----
-
-## 9. BrickFlow：连通性引导的积木重建
-
-**原标题：** BrickFlow: Connectivity-Guided Brick Reconstruction
-
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-12 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Peter Kulits、Cordelia Schmid |
-| 链接 | [2611.17321v1](http://arxiv.org/abs/2611.17321v1) |
-
-**摘要：**
-
-给定乐高零件与装配体图像，本文推断各零件位姿以完成积木重建。针对离散物理约束带来的组合敏感问题，在程序生成装配体上训练集合条件SE(3)流模型，并以1%数据微调注入图像条件；测试时引入解析连通场引导，使预测趋向连通装配。实验表明，随模型规模、预训练和引导增强，重建质量提升。
-
----
-
-## 10. 基于显式对应关系的一致视频到视频转换
-
-**原标题：** Consistent Video-to-Video Translation via Explicit Correspondences
-
-| 字段 | 内容 |
-|------|------|
-| 话题 | 计算机图形学与游戏 |
-| 发布时间 | 2026-11-12 |
-| 流行度 | 🆕 新论文·暂无引用数据 |
-| 作者 | Gaurav Parmar、Zhengqi Li、Richard Zhang |
-| 链接 | [2611.17298v1](http://arxiv.org/abs/2611.17298v1) |
-
-**摘要：**
-
-交互式视频到视频应用需实时生成并保持长程时序一致，而固定长度因果窗口会限制一致性。本文提出基于对应关系的vid2vid-long：在输入视频中计算块级对应，检索对应区域的历史生成结果，并通过对应交叉注意力条件化模型。实验表明，该方法在保持生成质量与实时性的同时，持续提升多种近期视频模型的长程时序一致性。
-
----
+*由 GitHub Actions + DeepSeek 自动生成 · 数据来源 arXiv & Semantic Scholar*
