@@ -228,6 +228,8 @@ DEEPSEEK_API_KEY=sk-xxx python main.py --dry-run
 2. **中文精读页**：已完成。见 `reader.py`，托管在 GitHub Pages。
 3. **针对论文提问**：还没做。目标是可以问"这个方法和我做的项目有什么关系""第三段的假设是什么"，回答要引用原文段落。
 
+完整清单（含体验、工程、产品想法和已知限制）见 [TODO.md](TODO.md)。
+
 ---
 
 ## 常见问题
